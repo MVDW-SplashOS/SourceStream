@@ -122,7 +122,7 @@ unpack_tool() {
 			cd ..
 		fi
 
-		tar -cJf ../output/${TOOL}_${TOOL_VERSION}.tar.xz $bn
+		tar -cJf ../output/${TOOL}_${TOOL_VERSION}.tar.xz $dir
 		rm -rf ./$dir
 		echo_ok "Package \e[1;37m${TOOL}\e[0m repacked successfully."
 	done

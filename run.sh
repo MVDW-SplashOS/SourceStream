@@ -4,8 +4,8 @@
 set -e
 
 export LANG=C
-export VERSION_STR="0.1.0 Alpha"
-export VERSION_DATE="22 Jul 2023"
+export VERSION_STR="1.0.0"
+export VERSION_DATE="23 Jul 2023"
 
 export DOWNLOAD_RETRYS=0
 export DOWNLOAD_RETRYS_MAX=3
@@ -31,9 +31,7 @@ echo_info() {
 	printf "[INFO] $1\n"
 }
 
-# Include and parse yaml script
-export yaml_file=./config.yml
-export yaml_prefix="config_"
+# Include dependency
 source ./lib/parse_yaml.sh
 
 download_tools_list() {
@@ -121,8 +119,8 @@ unpack_tool() {
 			patch -Np1 -i ../$bn.patch
 			cd ..
 		fi
-
-		tar -cJf ../output/${TOOL}_${TOOL_VERSION}.tar.xz $dir
+		mkdir -p ../output/${TOOL}
+		tar -cJf ../output/${TOOL}/${TOOL}-${TOOL_VERSION}.tar.xz $dir
 		rm -rf ./$dir
 		echo_ok "Package \e[1;37m${TOOL}\e[0m repacked successfully."
 	done
@@ -142,18 +140,27 @@ main() {
 
 	# Create input/output directory
 	mkdir -p {input,output}
-	echo_info "Created input/output directory's"
+	echo_info "Created input/output directory's."
 
 	# Parse config file
-	create_variables
+
 	echo_info "Reading config file."
+	export yaml_file=./config.yml
+	export yaml_prefix="config_"
+	create_variables
+
+	echo_info "Get source file from $config_edition edition."
+	wget -q https://www.enthix.net/SplashOS/downloads/configs/edition-packages/${config_version}/${config_edition}.yml -O ./edition-sources.yml
+	export yaml_file=./edition-sources.yml
+	export yaml_prefix="config_"
+	create_variables
 
 	download_tools_list
 	echo_info "Downloading and checking packages has been complete."
 
 	unpack_tool
 	echo_info "Repacking tools has been complete."
-	
+
 	separator
 	printf "\n"
 	printf "Finished all processes."

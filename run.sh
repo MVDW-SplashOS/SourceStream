@@ -4,8 +4,8 @@
 set -e
 
 export LANG=C
-export VERSION_STR="1.0.0"
-export VERSION_DATE="23 Jul 2023"
+export VERSION_STR="1.1.0"
+export VERSION_DATE="24 Jul 2023"
 
 export DOWNLOAD_RETRYS=0
 export DOWNLOAD_RETRYS_MAX=3
@@ -100,28 +100,35 @@ unpack_tool() {
 		bn=$(basename $TOOL_URL)
 		dir=$(echo $bn | awk -F"\\\\.t" '{print $1}')
 
-		# Dirty fixes for annoying issues
+		# Dirty fix for tcl docs package
 		dir=$(echo $dir | awk -F"\\\\-src" '{print $1}')
 		if [ $TOOL = "tcl_docs" ]; then
 			dir=$(echo $dir | awk -F"\\\\-html" '{print $1}')
 		fi
+
+		# Dirty fix for tzdata package
 		if [ $TOOL = "tzdata" ]; then
-			mkdir tzdata2022g
-			cd tzdata2022g
+			mkdir -p ${TOOL}-${TOOL_VERSION}
+			cd ${TOOL}-${TOOL_VERSION}
+			echo $bn
 			tar --overwrite -xf ../$bn
 			cd ..
 		else
 			tar --overwrite -xf ./$bn
+
+			if ! [ $dir == "${TOOL}-${TOOL_VERSION}" ]; then
+				mv $dir ${TOOL}-${TOOL_VERSION}
+			fi
 		fi
 
 		if ! [ $TOOL_PATCH == "false" ]; then
-			cd $dir
+			cd ${TOOL}-${TOOL_VERSION}
 			patch -Np1 -i ../$bn.patch
 			cd ..
 		fi
 		mkdir -p ../output/${TOOL}
-		tar -cJf ../output/${TOOL}/${TOOL}-${TOOL_VERSION}.tar.xz $dir
-		rm -rf ./$dir
+		tar -cJf ../output/${TOOL}/${TOOL}-${TOOL_VERSION}.tar.xz ${TOOL}-${TOOL_VERSION}
+		rm -rf ./${TOOL}-${TOOL_VERSION}
 		echo_ok "Package \e[1;37m${TOOL}\e[0m repacked successfully."
 	done
 }

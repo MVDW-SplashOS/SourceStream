@@ -1,6 +1,6 @@
-# Edition to get all packages of
-# Please choose between core, desktop and server
-edition: core
+# Edition of the sources file 
+# Please choose between molecule, desktop and server
+edition: molecule
 
-# The version of the config file
+# The version of the sources file
 version: 0.0.1-dev

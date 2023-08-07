@@ -1,5 +1,6 @@
 # Edition of the sources file 
-# Please choose between molecule, desktop and server
+# Please choose between molecule, desktop, custom and server
+# NOTE: With a custom edition it doesn't download any configuration files so it has to be created manually.
 edition: molecule
 
 # The version of the sources file

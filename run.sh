@@ -4,8 +4,8 @@
 set -e
 
 export LANG=C
-export VERSION_STR="1.1.0"
-export VERSION_DATE="24 Jul 2023"
+export VERSION_STR="1.2.0"
+export VERSION_DATE="7 Aug 2023"
 
 export DOWNLOAD_RETRYS=0
 export DOWNLOAD_RETRYS_MAX=3
@@ -34,6 +34,13 @@ echo_info() {
 # Include dependency
 source ./lib/parse_yaml.sh
 
+clone_buildscript_repo() {
+	echo_info "Starting cloning buildscript repo..."
+	if ! test -d ./input/buildscripts; then
+		git clone https://github.com/MVDW-SplashOS/BuildScripts.git ./input/buildscripts -q
+	fi
+}
+
 download_tools_list() {
 	echo_info "Starting to download and check packages, this can take a while..."
 
@@ -45,13 +52,6 @@ download_tools_list() {
 		eval "TOOL_MD5=\${config_tools_list__${TOOL}__checksum}"
 
 		bn=$(basename $TOOL_URL)
-
-		if ! [ $TOOL_PATCH == "false" ]; then
-
-			if ! test -f ./input/$bn.patch; then
-				wget -q $TOOL_PATCH -O ./input/$bn.patch
-			fi
-		fi
 
 		if ! test -f ./input/$bn; then
 			download_tool $TOOL_URL $bn
@@ -121,13 +121,13 @@ unpack_tool() {
 			fi
 		fi
 
-		if ! [ $TOOL_PATCH == "false" ]; then
-			cd ${TOOL}-${TOOL_VERSION}
-			patch -Np1 -i ../$bn.patch
-			cd ..
-		fi
 		mkdir -p ../output/${TOOL}
-		tar -cJf ../output/${TOOL}/${TOOL}-${TOOL_VERSION}.tar.xz ${TOOL}-${TOOL_VERSION}
+		if ! test -d buildscripts/${TOOL}; then
+			tar -cJf ../output/${TOOL}/${TOOL}-${TOOL_VERSION}.tar.xz ${TOOL}-${TOOL_VERSION}
+			echo_warn "The package $TOOL does not have a manifest."
+		else
+			tar -cJf ../output/${TOOL}/${TOOL}-${TOOL_VERSION}.tar.xz -C . ${TOOL}-${TOOL_VERSION} -C buildscripts/${TOOL} . 
+		fi
 		rm -rf ./${TOOL}-${TOOL_VERSION}
 		echo_ok "Package \e[1;37m${TOOL}\e[0m repacked successfully."
 	done
@@ -156,11 +156,19 @@ main() {
 	export yaml_prefix="config_"
 	create_variables
 
-	echo_info "Get source file from $config_edition edition."
-	wget -q https://www.enthix.net/SplashOS/downloads/configs/edition-packages/${config_version}/${config_edition}.yml -O ./edition-sources.yml
+	if [ $config_edition = "custom" ]; then
+		echo_info "Using custom edition, Checking if file is valid."
+		# TODO: Do checks if file is valid.
+	else
+		echo_info "Get source file from $config_edition edition."
+		wget -q https://www.enthix.net/SplashOS/downloads/configs/edition-packages/${config_version}/${config_edition}.yml -O ./edition-sources.yml
+	fi
 	export yaml_file=./edition-sources.yml
 	export yaml_prefix="config_"
 	create_variables
+
+	clone_buildscript_repo
+	echo_info "Cloning buildscript repository has been complete."
 
 	download_tools_list
 	echo_info "Downloading and checking packages has been complete."

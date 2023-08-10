@@ -22,7 +22,7 @@ YAML_SOURCES = {};
 
 DIR_INPUT = "./input/";
 DIR_OUTPUT = "./output/";
-DIR_BUILTSCRIPTSS = DIR_INPUT + "BuildScripts";
+DIR_BUILTSCRIPTS = DIR_INPUT + "BuildScripts";
 
 class log:
 

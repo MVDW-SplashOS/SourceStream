@@ -20,19 +20,22 @@ YAML_CONFIG = {};
 YAML_EDITION = {};
 YAML_SOURCES = {};
 
+DIR_INPUT = "./input/";
+DIR_OUTPUT = "./output/";
+
 class log:
 
-    def info(message):
-        sys.stderr.write("[INFO] " + message + "\n");
+    def info(self):
+        sys.stderr.write("[INFO] " + self + "\n");
 
-    def ok(message):
-        sys.stderr.write("[ \x1b[0;32mOK\x1b[1;0m ] " + message + "\n");
+    def ok(self):
+        sys.stderr.write("[ \x1b[0;32mOK\x1b[1;0m ] " + self + "\n");
 
-    def warn(message):
-        sys.stderr.write("[\x1b[0;93mWARN\x1b[1;0m] " + message + "\n");
+    def warn(self):
+        sys.stderr.write("[\x1b[0;93mWARN\x1b[1;0m] " + self + "\n");
 
-    def fail(message):
-        sys.stderr.write("[\x1b[1;31mFAIL\x1b[1;0m] " + message + "\n");
+    def fail(self):
+        sys.stderr.write("[\x1b[1;31mFAIL\x1b[1;0m] " + self + "\n");
 
 
 def configloader(file_type):
@@ -59,9 +62,9 @@ def download_tools_list():
         url = YAML_SOURCES[package]["url"].replace("{VERSION}", version);
         filename = os.path.basename(url);
 
-        if not os.path.exists("./input/" + filename):
+        if not os.path.exists(DIR_INPUT + filename):
             r = requests.get(url)
-            open("./input/" + filename, 'wb').write(r.content)
+            open(DIR_INPUT + filename, 'wb').write(r.content)
             log.ok("Downloaded package \x1b[1;37m" + package + "\x1b[0m Successfully.")
 
 def repack_tool_list():
@@ -72,34 +75,34 @@ def repack_tool_list():
         filename = os.path.basename(url);
         
 
-        with tarfile.open("./input/" + filename) as f:
+        with tarfile.open(DIR_INPUT + filename) as f:
             if not YAML_SOURCES[package]["subdir"]:
-                os.makedirs("./input/" + package + "-" + version, exist_ok=True)
-                f.extractall("./input/" + package + "-" + version)
+                os.makedirs(DIR_INPUT + package + "-" + version, exist_ok=True)
+                f.extractall(DIR_INPUT + package + "-" + version)
             else:
-                f.extractall("./input")
+                f.extractall(DIR_INPUT)
 
         if isinstance(YAML_SOURCES[package]["subdir"], str):
             subdir = YAML_SOURCES[package]["subdir"].replace("{VERSION}", version).replace("{PACKAGE}", package);
-            os.rename("./input/" + subdir, "./input/" + package + "-" + version); 
+            os.rename(DIR_INPUT + subdir, DIR_INPUT + package + "-" + version); 
 
-        os.makedirs("./output/" + package, exist_ok=True)
-        with tarfile.open("./output/" + package + "/" + package + "-" + version + ".tar.xz", "w:xz") as tar:
-            tar.add("./input/" + package + "-" + version, arcname=package + "-" + version)
+        os.makedirs(DIR_OUTPUT + package, exist_ok=True)
+        with tarfile.open(DIR_OUTPUT + package + "/" + package + "-" + version + ".tar.xz", "w:xz") as tar:
+            tar.add(DIR_INPUT + package + "-" + version, arcname=package + "-" + version)
 
             # Check if buildscript exist for these packages
-            if os.path.exists("./input/BuildScripts/" + package):
-                tar.add("./input/BuildScripts/" + package + "/manifest.yml", arcname="manifest.yml")
+            if os.path.exists(DIR_INPUT + "BuildScripts/" + package):
+                tar.add(DIR_INPUT + "BuildScripts/" + package + "/manifest.yml", arcname="manifest.yml")
 
                 # Check if there are some extra folders included 
-                if os.path.exists("./input/BuildScripts/" + package + "/build"):
-                    tar.add("./input/BuildScripts/" + package + "/build", arcname="build")
-                if os.path.exists("./input/BuildScripts/" + package + "/patch"):
-                    tar.add("./input/BuildScripts/" + package + "/patch", arcname="patch")
+                if os.path.exists(DIR_INPUT + "BuildScripts/" + package + "/build"):
+                    tar.add(DIR_INPUT + "BuildScripts/" + package + "/build", arcname="build")
+                if os.path.exists(DIR_INPUT + "BuildScripts/" + package + "/patch"):
+                    tar.add(DIR_INPUT + "BuildScripts/" + package + "/patch", arcname="patch")
             else:
                 log.warn("The package " + package + " does not have a manifest.")
 
-        shutil.rmtree("./input/" + package + "-" + version)
+        shutil.rmtree(DIR_INPUT + package + "-" + version)
         log.ok("Repacked package \x1b[1;37m" + package + "\x1b[0m Successfully.")
 
 
@@ -117,8 +120,8 @@ def main():
 
     # Create input/output directory
     log.info("Created input/output directory's.");
-    os.makedirs("./input", exist_ok=True)
-    os.makedirs("./output", exist_ok=True)
+    os.makedirs(DIR_INPUT, exist_ok=True)
+    os.makedirs(DIR_OUTPUT, exist_ok=True)
     
     # Read config
     log.info("Reading config file.");
@@ -143,7 +146,7 @@ def main():
     # Cloning buildscipt repo
     log.info("Cloning buildscript repository.");
     if not os.path.exists("./input/BuildScripts"):
-        git.Git("./input").clone("https://github.com/MVDW-SplashOS/BuildScripts.git");
+        git.Git(DIR_INPUT).clone("https://github.com/MVDW-SplashOS/BuildScripts.git");
     
     # Downloading all required packages
     log.info("Starting to download and check packages, this can take a while...");

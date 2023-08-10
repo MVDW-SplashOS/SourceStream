@@ -22,6 +22,7 @@ YAML_SOURCES = {};
 
 DIR_INPUT = "./input/";
 DIR_OUTPUT = "./output/";
+DIR_BUILTSCRIPTSS = DIR_INPUT + "BuildScripts";
 
 class log:
 
@@ -91,14 +92,14 @@ def repack_tool_list():
             tar.add(DIR_INPUT + package + "-" + version, arcname=package + "-" + version)
 
             # Check if buildscript exist for these packages
-            if os.path.exists(DIR_INPUT + "BuildScripts/" + package):
-                tar.add(DIR_INPUT + "BuildScripts/" + package + "/manifest.yml", arcname="manifest.yml")
+            if os.path.exists(DIR_BUILTSCRIPTS + package):
+                tar.add(DIR_BUILTSCRIPTS + package + "/manifest.yml", arcname="manifest.yml")
 
                 # Check if there are some extra folders included 
-                if os.path.exists(DIR_INPUT + "BuildScripts/" + package + "/build"):
-                    tar.add(DIR_INPUT + "BuildScripts/" + package + "/build", arcname="build")
-                if os.path.exists(DIR_INPUT + "BuildScripts/" + package + "/patch"):
-                    tar.add(DIR_INPUT + "BuildScripts/" + package + "/patch", arcname="patch")
+                if os.path.exists(DIR_BUILTSCRIPTS + package + "/build"):
+                    tar.add(DIR_BUILTSCRIPTS + package + "/build", arcname="build")
+                if os.path.exists(DIR_BUILTSCRIPTS + package + "/patch"):
+                    tar.add(DIR_BUILTSCRIPTS + package + "/patch", arcname="patch")
             else:
                 log.warn("The package " + package + " does not have a manifest.")
 
@@ -145,8 +146,8 @@ def main():
 
     # Cloning buildscipt repo
     log.info("Cloning buildscript repository.");
-    if not os.path.exists("./input/BuildScripts"):
-        git.Git(DIR_INPUT).clone("https://github.com/MVDW-SplashOS/BuildScripts.git");
+    if not os.path.exists(DIR_BUILTSCRIPTS):
+        git.Git(DIR_BUILTSCRIPTS).clone("https://github.com/MVDW-SplashOS/BuildScripts.git");
     
     # Downloading all required packages
     log.info("Starting to download and check packages, this can take a while...");

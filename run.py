@@ -5,6 +5,7 @@ import tarfile
 import shutil
 import yaml
 import git
+import sys
 import io
 import os
 
@@ -80,10 +81,63 @@ def repack_tool_list():
         shutil.rmtree(DIR_INPUT + package + "-" + version)
         logger.log.ok("Repacked package \x1b[1;37m" + package + "\x1b[0m Successfully.")
 
+def print_help():
+    logger.log.print("SourceStream Manual", "\n\n");
+
+    logger.log.print("Usage: 'python3 " + sys.argv[0] + " --<argument 1> --[argument 2]'");
+    logger.log.print("<> = required argument")
+    logger.log.print("[] = optional argument", "\n\n")
+
+    logger.log.print("Help tree format:");
+    help_explain_tree = [
+        "argument 1",
+        "argument 2", ["alternative for argument 2"],
+        "argument 3"
+
+    ]
+    logger.log.tree(help_explain_tree, False);
+
+    logger.log.print("", "\n\n");
+
+    logger.log.print("Available arguments:")
+    help_available_args = [
+        "help                      :    Prints out the manual.", ["h", "man", "manual"],
+        "list-packages             :    List out all packages required by the edition.", ["list"],
+        "edition-name:<name>       :    Sets the edition name, overriding the value from config", ["e-name:<name>", "e-n:<name>"],
+        "edition-version:<version> :    Sets the edition version, overriding the value from config", ["e-ver:<version>", "e-v:<version>"],
+        "package-name:<name>       :    Select a spesific the package name", ["p-ver:<name>", "p-v:<name>"],
+        "package-version:<version> :    Select a spesific the package version, overriding the value from edition", ["p-ver:<version>", "p-v:<version>"],
+        "quiet                     :    Stops all log printing.",
+        "disable-logging           :    Disable creating/writing to the log file."
+    ]
+
+    logger.log.tree(help_available_args, False);
 
 
 def main():
     global YAML_CONFIG, YAML_EDITION, YAML_SOURCES;
+
+
+
+    if len(sys.argv) == 1:
+        logger.log.warn("Usage: 'python3 " + sys.argv[0] + " --<argument 1> --[argument 2]'");
+        logger.log.print("");
+        logger.log.print("For the manual please add the --help argument.");
+        return;
+
+    i=0;
+    for arg in sys.argv:
+        if i >= 1:
+            arg = arg.lower();
+            match arg:
+                case "--help" | "--man" | "--manual":
+                    print_help();
+                    return;
+
+        i=i+1;
+
+
+
 
     # Print basic tool information
     text_title = text.format("\x1b[1;36mSourceStream\x1b[1;0m");
@@ -155,10 +209,12 @@ def main():
     repack_tool_list();
     logger.log.info("Repacking tools has been complete.");
 
-    logger.log.print(separator);
     logger.log.print("");
-    logger.log.print("Finished repacking.");
-    logger.log.print("");
+
+    logger.log.info(separator);
+    logger.log.info("");
+    logger.log.info("Finished repacking.");
+    logger.log.info("");
 
 
 

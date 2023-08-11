@@ -1,8 +1,9 @@
+from SplashPyUtils import logger, config, text
+
 import requests
 import tarfile
 import shutil
 import yaml
-import sys
 import git
 import io
 import os
@@ -16,42 +17,13 @@ DOWNLOAD_RETRYS_MAX = 3;
 
 separator="--------------------------------------------------------------------";
 
-YAML_CONFIG = {};
-YAML_EDITION = {};
-YAML_SOURCES = {};
-
 DIR_INPUT = "./input/";
 DIR_OUTPUT = "./output/";
 DIR_BUILTSCRIPTS = DIR_INPUT + "BuildScripts";
 
-class log:
-
-    def info(self):
-        sys.stderr.write("[INFO] " + self + "\n");
-
-    def ok(self):
-        sys.stderr.write("[ \x1b[0;32mOK\x1b[1;0m ] " + self + "\n");
-
-    def warn(self):
-        sys.stderr.write("[\x1b[0;93mWARN\x1b[1;0m] " + self + "\n");
-
-    def fail(self):
-        sys.stderr.write("[\x1b[1;31mFAIL\x1b[1;0m] " + self + "\n");
-
-
-def configloader(file_type):
-    mapping = {
-        "config": ("config.yml", YAML_CONFIG),
-        "edition": ("edition-configuration.yml", YAML_EDITION),
-        "sources": ("upstream-sources.yml", YAML_SOURCES)
-    }
-
-    if file_type in mapping:
-        file, data = mapping[file_type]
-        with open(file, 'r') as stream:
-            data.update(yaml.safe_load(stream))  # Update the dictionary with loaded content
-    else:
-        raise ValueError("Invalid file_type")
+YAML_CONFIG = {};
+YAML_EDITION = {};
+YAML_SOURCES = {};
 
 
 
@@ -66,7 +38,9 @@ def download_tools_list():
         if not os.path.exists(DIR_INPUT + filename):
             r = requests.get(url)
             open(DIR_INPUT + filename, 'wb').write(r.content)
-            log.ok("Downloaded package \x1b[1;37m" + package + "\x1b[0m Successfully.")
+            logger.log.ok("Downloaded package \x1b[1;37m" + package + "\x1b[0m Successfully.")
+
+
 
 def repack_tool_list():
     for tool in YAML_EDITION["packages"]:
@@ -101,67 +75,92 @@ def repack_tool_list():
                 if os.path.exists(DIR_BUILTSCRIPTS + package + "/patch"):
                     tar.add(DIR_BUILTSCRIPTS + package + "/patch", arcname="patch")
             else:
-                log.warn("The package " + package + " does not have a manifest.")
+                logger.log.warn("The package " + package + " does not have a manifest.")
 
         shutil.rmtree(DIR_INPUT + package + "-" + version)
-        log.ok("Repacked package \x1b[1;37m" + package + "\x1b[0m Successfully.")
+        logger.log.ok("Repacked package \x1b[1;37m" + package + "\x1b[0m Successfully.")
+
 
 
 def main():
+    global YAML_CONFIG, YAML_EDITION, YAML_SOURCES;
 
     # Print basic tool information
-    sys.stderr.write(separator);
-    sys.stderr.write("\n\n");
-    sys.stderr.write("\x1b[1;36mSourceStream\n")
-    sys.stderr.write("\x1b[0;36mA tool to download, patch and repack core packages for SplashOS\n")
-    sys.stderr.write("Version: " + VERSION_STR +" (" + VERSION_DATE + ")\x1b[0;0m\n")
-    sys.stderr.write("\n")
-    sys.stderr.write(separator);
-    sys.stderr.write("\n\n");
+    text_title = text.format("\x1b[1;36mSourceStream\x1b[1;0m");
+    text_title.center();
+
+    text_desc = text.format("\x1b[0;36mA tool to download, patch and repack core packages for SplashOS\x1b[1;0m");
+    text_desc.center();
+    
+    text_ver = text.format("\x1b[0;36mVersion: " + VERSION_STR +" (" + VERSION_DATE + ")\x1b[0;0m");
+    text_ver.center();
+
+    logger.log.info(separator);
+    logger.log.info("");
+    logger.log.info(text_title.ret())
+    logger.log.info(text_desc.ret())
+    logger.log.info(text_ver.ret())
+    logger.log.info("")
+    logger.log.info(separator);
+    logger.log.print("\n");
+
+
 
     # Create input/output directory
-    log.info("Created input/output directory's.");
+    logger.log.info("Created input/output directory's.");
     os.makedirs(DIR_INPUT, exist_ok=True)
     os.makedirs(DIR_OUTPUT, exist_ok=True)
     
+
+
     # Read config
-    log.info("Reading config file.");
-    configloader("config")
+    logger.log.info("Reading config file.");
+    YAML_CONFIG = config.configloader("config").load()
+
+
 
     # Downloading and reading latest source file
-    log.info("Downloading latest source file");
+    logger.log.info("Downloading latest source file");
     r = requests.get("https://www.enthix.net/SplashOS/downloads/configs/upstream-sources.yml")
     open("upstream-sources.yml", 'wb').write(r.content)
-    configloader("sources")
+    YAML_SOURCES = config.configloader("sources").load()
+
+
 
     # Downloading and reading edition configuration when needed, else check config
     if YAML_CONFIG["edition"] == "custom":
-        log.info("Using custom edition, Checking if file is valid.");
+        logger.log.info("Using custom edition, Checking if file is valid.");
         # TODO: Check if config is valid
     else:
-        log.info("Get source file from " + YAML_CONFIG["edition"] + " edition.");
+        logger.log.info("Get source file from " + YAML_CONFIG["edition"] + " edition.");
         r = requests.get("https://www.enthix.net/SplashOS/downloads/configs/edition-packages/" + YAML_CONFIG["version"] + "/" + YAML_CONFIG["edition"] + ".yml")
         open("edition-configuration.yml", 'wb').write(r.content)
-    configloader("edition")
+    YAML_EDITION = config.configloader("edition").load();
+
+
 
     # Cloning buildscipt repo
-    log.info("Cloning buildscript repository.");
+    logger.log.info("Cloning buildscript repository.");
     if not os.path.exists(DIR_BUILTSCRIPTS):
         git.Git(DIR_BUILTSCRIPTS).clone("https://github.com/MVDW-SplashOS/BuildScripts.git");
-    
+
+
+
     # Downloading all required packages
-    log.info("Starting to download and check packages, this can take a while...");
+    logger.log.info("Starting to download and check packages, this can take a while...");
     download_tools_list()
-    log.info("Downloading and checking packages has been complete.");
+    logger.log.info("Downloading and checking packages has been complete.");
 
-    log.info("Starting to repack packages, this can take a while...");
+    logger.log.info("Starting to repack packages, this can take a while...");
     repack_tool_list();
-    log.info("Repacking tools has been complete.");
+    logger.log.info("Repacking tools has been complete.");
 
-    sys.stderr.write(separator);
-    sys.stderr.write("\n");
-    sys.stderr.write("Finished repacking.");
-    sys.stderr.write("\n");
+    logger.log.print(separator);
+    logger.log.print("");
+    logger.log.print("Finished repacking.");
+    logger.log.print("");
+
+
 
 if __name__=="__main__":
     main()

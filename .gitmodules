@@ -1,0 +1,3 @@
+[submodule "SplashPyUtils"]
+	path = SplashPyUtils
+	url = https://github.com/MVDW-SplashOS/SplashPyUtils.git

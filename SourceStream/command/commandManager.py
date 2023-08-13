@@ -19,11 +19,11 @@ def run_command():
             match arg[0]:
                 case "--help" | "--man" | "--manual":
                     help.print_help();
-                    return;
+                    exit();
                 case "--package" | "--p":
                     if len(arg) == 1:
                         logger.log.fail("The package argument requires one and one optional parameter: --package:<package>:[version]")
-                        return;
+                        exit(1);
                     elif len(arg) == 2:
                         package = []
                         package.append(arg[1]);
@@ -35,7 +35,7 @@ def run_command():
                         packages.append(package);
                     else:
                         logger.log.fail("Too many parameters for the package argument: --package:<package>:[version]");
-                        return;
+                        exit(1);
 
         i=i+1;
     

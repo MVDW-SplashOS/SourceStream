@@ -26,7 +26,7 @@ def print_help():
         "list-packages             :    List out all packages required by the edition.", ["list"],
         "edition-name:<name>       :    Sets the edition name, overriding the value from config.", ["e-name:<name>", "e-n:<name>"],
         "edition-version:<version> :    Sets the edition version, overriding the value from config.", ["e-ver:<version>", "e-v:<version>"],
-        "package:<name>:[version]  :    Select a spesific the package name.", ["p:<name>:[ver]"],
+        "package:<name>:[version]  :    Select a specific package to pack.", ["p:<name>:[ver]"],
         "quiet                     :    Stops all log printing.",
         "disable-logging           :    Disable creating/writing to the log file."
     ]

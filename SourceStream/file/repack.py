@@ -29,6 +29,7 @@ def repack_tool(tool, yaml_sources):
         tar.add(SourceStream.DIR_INPUT + package + "-" + version, arcname=package + "-" + version)
 
         # Check if buildscript exist for these packages
+        
         if os.path.exists(SourceStream.DIR_BUILTSCRIPTS + package):
             tar.add(SourceStream.DIR_BUILTSCRIPTS + package + "/manifest.yml", arcname="manifest.yml")
 

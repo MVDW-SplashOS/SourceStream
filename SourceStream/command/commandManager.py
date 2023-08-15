@@ -7,23 +7,26 @@ import sys
 # Commands
 from .help import help
 from .package import package
-from .package_list import package_list
+from .upstream import upstream
 
 
 
 def run_command():
 
     for arg in sys.argv[1:]:
-        arg = arg.lower().split(":")
 
-        if arg[0] in ["--help", "--man", "--manual"]:
+        arg = arg.split(":")
+        command = arg[0].replace("--", "").split("-")
+        
+
+        if command[0] in ["help", "man", "manual"]:
             help.print_help()
 
-        elif arg[0] in ["--package", "--p"]:
-            package.run(arg);
+        elif command[0] in ["package", "p", "list"]:
+            package.run(command, arg);
 
-        elif arg[0] in ["--package-list", "--list"]:
-            package_list.run();
+        elif command[0] in ["upstream"]:
+            upstream.run(command, arg);
     
         else:
             logger.log.fail("Invalid argument, please check the manual: --help")

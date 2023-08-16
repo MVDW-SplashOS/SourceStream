@@ -1,6 +1,6 @@
 from .vendor.SplashPyUtils import logger, text
 from .command import commandManager
-from .file import config, download, repack
+from .file import config, download, repack, push
 
 import dload
 import sys
@@ -96,6 +96,8 @@ def main():
     for tool in tools:
         repack.repack_tool(tool, YAML_SOURCES)
 
+    logger.log.info("Starting to push packages to final destination...");
+    push.push(tools)
 
     logger.log.print("");
 

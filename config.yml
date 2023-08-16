@@ -1,12 +1,30 @@
 # Edition of the sources file 
 # Please choose between molecule, desktop, custom and server
 # NOTE: With a custom edition it doesn't download any configuration files so it has to be created manually.
-edition: molecule
+edition: "molecule"
 
 # The version of the sources file
-version: 0.0.1-dev
+version: "0.0.1-dev"
 
 # Downloading the latest upstream-source.yml file from official source.
 # NOTE: This option will be ignored if the file .lock-sources exist in the root folder.
 #       Updating the sources file will be disabled.
 update-sources: true
+
+push:
+  # Where should the final destination for the package be:
+  # Please choose between the following options:
+  #   - none : Will keep everything in ./output
+  #   - sftp : Uploads all files to an sftp server
+  type: "sftp"
+
+  # SFTP options, if you have selected an other type where to push this will be ignored.
+  sftp:
+    host: ""
+    port: "21"
+    username: ""
+    password: ""
+    path: ""
+
+# DO NOT CHANGE THIS
+config-version: 1

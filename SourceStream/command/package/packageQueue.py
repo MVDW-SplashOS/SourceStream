@@ -15,12 +15,14 @@ def add(arg):
     package_info = {"package": arg[1], "version": arg[2]} if len(arg) == 3 else None
 
     if package_info is None:
+    
         for tool in SourceStream.YAML_EDITION["packages"]:
             if tool["package"] == arg[1]:
                 package_info = {"package": arg[1], "version": tool["version"]}
                 break
         else:
-            logger.log.fail(f"Can't find the package '{arg[1]}', did you spell the name correctly?")
+            logger.log.fail("Can't find the package '{arg[1]}', did you spell the name correctly?")
             exit(1)
+        
 
     SourceStream.PACKAGES.append(package_info)

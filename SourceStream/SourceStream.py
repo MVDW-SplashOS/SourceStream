@@ -90,11 +90,11 @@ def main():
 
     logger.log.info("Starting to download and check packages, this can take a while...");
     for tool in tools:
-        download.download_tool(tool, YAML_SOURCES)
+        download.download_tool(tool)
 
     logger.log.info("Starting to repack packages, this can take a while...");
     for tool in tools:
-        repack.repack_tool(tool, YAML_SOURCES)
+        repack.repack_tool(tool)
 
     logger.log.info("Starting to push packages to final destination...");
     push.push(tools)

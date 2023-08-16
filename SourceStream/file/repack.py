@@ -6,40 +6,50 @@ import shutil
 import tarfile
 import os
 
-def repack_tool(tool, yaml_sources):
-    package = tool["package"];
-    version = tool["version"];
-    url = yaml_sources[package]["url"].replace("{VERSION}", version);
-    filename = os.path.basename(url);
-    
+def repack_tool(packages):
+    package_name = packages["package"];
+    package_version = packages["version"];
+    package_url = SourceStream.YAML_SOURCES[package_name]["url"].replace("{VERSION}", package_version);
+    package_filename = os.path.basename(package_url);
+    package_fullname = package_name + "-" + package_version
+    package_path_input = os.path.join(SourceStream.DIR_INPUT, package_filename)
+    package_path_folder = os.path.join(SourceStream.DIR_INPUT, package_fullname)
 
-    with tarfile.open(SourceStream.DIR_INPUT + filename) as f:
-        if not yaml_sources[package]["subdir"]:
-            os.makedirs(SourceStream.DIR_INPUT + package + "-" + version, exist_ok=True)
-            f.extractall(SourceStream.DIR_INPUT + package + "-" + version)
+    # Extract tar file in the input directory.
+    with tarfile.open(package_path_input) as f:
+        if not SourceStream.YAML_SOURCES[package_name]["subdir"]:
+            os.makedirs(package_path_folder, exist_ok=True)
+            f.extractall(package_path_folder)
         else:
             f.extractall(SourceStream.DIR_INPUT)
 
-    if isinstance(yaml_sources[package]["subdir"], str):
-        subdir = yaml_sources[package]["subdir"].replace("{VERSION}", version).replace("{PACKAGE}", package);
-        os.rename(SourceStream.DIR_INPUT + subdir, SourceStream.DIR_INPUT + package + "-" + version); 
+    # Check if the folder just extracted needs to be renamed.
+    if isinstance(SourceStream.YAML_SOURCES[package_name]["subdir"], str):
+        subdir = SourceStream.YAML_SOURCES[package_name]["subdir"].replace("{VERSION}", package_version).replace("{PACKAGE}", package_name);
+        path_source = os.path.join(SourceStream.DIR_INPUT, subdir)
+        os.rename(path_source, package_path_folder); 
 
-    os.makedirs(SourceStream.DIR_OUTPUT + package, exist_ok=True)
-    with tarfile.open(SourceStream.DIR_OUTPUT + package + "/" + package + "-" + version + ".tar.xz", "w:xz") as tar:
-        tar.add(SourceStream.DIR_INPUT + package + "-" + version, arcname=package + "-" + version)
+    # Create package directory where repacked tar file will be saved in.
+    os.makedirs(os.path.join(SourceStream.DIR_OUTPUT, package_name), exist_ok=True)
 
-        # Check if buildscript exist for these packages
-        
-        if os.path.exists(SourceStream.DIR_BUILTSCRIPTS + package):
-            tar.add(SourceStream.DIR_BUILTSCRIPTS + package + "/manifest.yml", arcname="manifest.yml")
+    # Create tar file
+    with tarfile.open(os.path.join(SourceStream.DIR_OUTPUT, package_name, package_fullname + ".tar.xz"), "w:xz") as tar:
+        tar.add(os.path.join(SourceStream.DIR_INPUT, package_fullname), arcname=package_fullname)
+
+        # Check if configuration files exist for these packages
+        if os.path.exists(os.path.join(SourceStream.DIR_BUILTSCRIPTS, package_name)):
+            tar.add(os.path.join(SourceStream.DIR_BUILTSCRIPTS, package_name, "manifest.yml"), arcname="manifest.yml")
 
             # Check if there are some extra folders included 
-            if os.path.exists(SourceStream.DIR_BUILTSCRIPTS + package + "/build"):
-                tar.add(SourceStream.DIR_BUILTSCRIPTS + package + "/build", arcname="build")
-            if os.path.exists(SourceStream.DIR_BUILTSCRIPTS + package + "/patch"):
-                tar.add(SourceStream.DIR_BUILTSCRIPTS + package + "/patch", arcname="patch")
+            if os.path.exists(os.path.join(SourceStream.DIR_BUILTSCRIPTS, package_name, "build")):
+                tar.add(os.path.join(SourceStream.DIR_BUILTSCRIPTS, package_name, "build"), arcname="build")
+            if os.path.exists(os.path.join(SourceStream.DIR_BUILTSCRIPTS, package_name, "patch")):
+                tar.add(os.path.join(SourceStream.DIR_BUILTSCRIPTS, package_name, "patch"), arcname="patch")
+        
         else:
-            logger.log.warn("The package " + package + " does not have a manifest.")
+            logger.log.warn("The package " + package_name + " does not have a manifest.")
 
-    shutil.rmtree(SourceStream.DIR_INPUT + package + "-" + version)
-    logger.log.ok("Repacked package \x1b[1;37m" + package + "\x1b[0m Successfully.")
+    # Cleanup the input folder
+    shutil.rmtree(package_path_folder)
+
+    logger.log.ok("Repacked package \x1b[1;37m" + package_name + "(" + package_version + ")\x1b[0m Successfully.")

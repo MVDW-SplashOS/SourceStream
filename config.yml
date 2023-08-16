@@ -16,7 +16,7 @@ push:
   # Please choose between the following options:
   #   - none : Will keep everything in ./output
   #   - sftp : Uploads all files to an sftp server
-  type: "sftp"
+  type: "none"
 
   # SFTP options, if you have selected an other type where to push this will be ignored.
   sftp:

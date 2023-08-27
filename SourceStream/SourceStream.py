@@ -1,6 +1,8 @@
 from .vendor.SplashPyUtils import logger, text
+
 from .command import commandManager
-from .file import config, download, repack, push
+from .task import taskManager
+from .file import config
 
 import dload
 import sys
@@ -28,6 +30,12 @@ YAML_CONFIG = {}
 YAML_EDITION = {}
 YAML_SOURCES = {}
 
+# Tasks types enabled
+TASK_TYPES_ENABLED = {
+    "REPACK_PACKAGES": False,
+    "MODIFY_EDITION": False
+}
+
 # Package information
 PACKAGES = [];
 PACKAGES_ALL = False;
@@ -43,7 +51,7 @@ def main():
 
     YAML_CONFIG, YAML_EDITION, YAML_SOURCES = config.load()
 
-    commandManager.run_command()
+    commandManager.run()
 
 
     # Print basic tool information
@@ -65,43 +73,11 @@ def main():
     logger.log.info(separator);
     logger.log.print("\n");
 
-
-    # Create input/output directory
-    logger.log.info("Created input/output directory's.");
-    os.makedirs(DIR_INPUT, exist_ok=True)
-    os.makedirs(DIR_OUTPUT, exist_ok=True)
-
-
-    # Cloning buildscipt repo
-    logger.log.info("Cloning buildscript repository.");
-    if not os.path.exists(DIR_BUILTSCRIPTS):
-        dload.git_clone("https://github.com/MVDW-SplashOS/BuildScripts.git", DIR_INPUT);
-
-
-    if len(PACKAGES) == 0 and PACKAGES_ALL == False:
-        logger.log.fail("No packages to repack.");
-        exit(1);
-
-
-    if PACKAGES_ALL:
-        tools = YAML_EDITION["packages"]
-    else:
-        tools = PACKAGES;
-
-    logger.log.info("Starting to download and check packages, this can take a while...");
-    for tool in tools:
-        download.download_tool(tool)
-
-    logger.log.info("Starting to repack packages, this can take a while...");
-    for tool in tools:
-        repack.repack_tool(tool)
-
-    logger.log.info("Starting to push packages to final destination...");
-    push.push(tools)
+    taskManager.run()
 
     logger.log.print("");
 
     logger.log.info(separator);
     logger.log.info("");
-    logger.log.info("Finished repacking.");
+    logger.log.info("Finished all tasks.");
     logger.log.info("");

@@ -11,7 +11,7 @@ from .upstream import upstream
 
 
 
-def run_command():
+def run():
 
     for arg in sys.argv[1:]:
 
@@ -24,9 +24,11 @@ def run_command():
 
         elif command[0] in ["package", "p", "list"]:
             package.run(command, arg);
+            SourceStream.TASK_TYPES_ENABLED["REPACK_PACKAGES"] = True;
 
         elif command[0] in ["upstream"]:
             upstream.run(command, arg);
+            SourceStream.TASK_TYPES_ENABLED["MODIFY_EDITION"] = True;
     
         else:
             logger.log.fail("Invalid argument, please check the manual: --help")

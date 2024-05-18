@@ -4,6 +4,7 @@ from ...vendor.SplashPyUtils import logger, text
 
 from ...file import download, repack, push
 
+import threading
 import dload
 import sys
 import os
@@ -45,7 +46,8 @@ def run():
 
     logger.log.info("Starting to repack packages, this can take a while...");
     for tool in tools:
-        repack.repack_tool(tool)
+        threading.Thread(target=repack.repack_tool, args=(tool, )).start()
+        #repack.repack_tool(tool)
 
     logger.log.info("Starting to push packages to final destination...");
     push.push(tools)

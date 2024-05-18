@@ -26,5 +26,11 @@ push:
     password: ""
     path: ""
 
+# Service options
+service:
+  webhook_key: "CHANGE_THIS_WITH_RANDOM_KEY"
+  host: "localhost"
+  port: 8080
+
 # DO NOT CHANGE THIS
 config-version: 1

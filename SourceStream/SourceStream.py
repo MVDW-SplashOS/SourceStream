@@ -10,7 +10,7 @@ import os
 
 # Versioning
 VERSION_STR = "2.1.0";
-VERSION_DATE = "13 Aug 2023";
+VERSION_DATE = "18 May 2024";
 
 # Download retry unused for now because md5sum are not included with upstream-sources.yml yet.
 DOWNLOAD_RETRYS = 0;
@@ -39,6 +39,11 @@ TASK_TYPES_ENABLED = {
 # Package information
 PACKAGES = [];
 PACKAGES_ALL = False;
+PACKAGE_REBUILD_AFTEER_BUILD = False;
+PACKAGE_REBUILDING = False;
+
+# Running as service
+AS_SERVICE = False;
 
 def main():
     global YAML_CONFIG, YAML_EDITION, YAML_SOURCES, PACKAGES;

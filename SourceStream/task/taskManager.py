@@ -1,13 +1,16 @@
 from .. import SourceStream;
 
 #tasks
-from .tasks import modifyEdition, repackPackages
+from .tasks import modifyEdition, repackPackages, service
 
 def run():
     TASKS_ENABLED = SourceStream.TASK_TYPES_ENABLED;
+    if(SourceStream.AS_SERVICE):
+        service.run()
+        
 
-    if(TASKS_ENABLED["REPACK_PACKAGES"]):
+    elif(TASKS_ENABLED["REPACK_PACKAGES"]):
         repackPackages.run()
 
-    if(TASKS_ENABLED["MODIFY_EDITION"]):
+    elif(TASKS_ENABLED["MODIFY_EDITION"]):
         modifyEdition.run()

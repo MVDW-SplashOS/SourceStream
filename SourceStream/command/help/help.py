@@ -23,6 +23,7 @@ def print_help():
     logger.log.print("Available arguments:")
     help_available_args = [
         "help                                             :  Prints out the manual.", ["h", "man", "manual"],
+        "serv                                             :  Running SourceStream as a service.",
         "package:<name>:[version]                         :  Select a specific package to pack.", ["p:<name>:[ver]"],
         "package-list:[package]:[version]                 :  List out all packages required by the edition.", ["list"],
         "upstream-add:<name>:[url]:[version]:[checksum]   :  Adding new source to the upstream-sources.yml(will lock yaml file)",

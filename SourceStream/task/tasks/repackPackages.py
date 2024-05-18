@@ -9,6 +9,11 @@ import sys
 import os
 
 def run():
+
+    SourceStream.PACKAGE_REBUILDING = True;
+
+    print(SourceStream.PACKAGE_REBUILDING)
+
     # Create input/output directory
     logger.log.info("Created input/output directory's.");
     os.makedirs(SourceStream.DIR_INPUT, exist_ok=True)
@@ -23,7 +28,10 @@ def run():
 
     if len(SourceStream.PACKAGES) == 0 and SourceStream.PACKAGES_ALL == False:
         logger.log.fail("No packages to repack.");
-        exit(1);
+        if(SourceStream.AS_SERVICE):
+            return;
+        else:
+            exit(1);
 
 
     if SourceStream.PACKAGES_ALL:
@@ -41,3 +49,8 @@ def run():
 
     logger.log.info("Starting to push packages to final destination...");
     push.push(tools)
+
+    SourceStream.PACKAGE_REBUILDING = False
+    if(SourceStream.AS_SERVICE and SourceStream.PACKAGE_REBUILD_AFTEER_BUILD):
+        SourceStream.PACKAGE_REBUILD_AFTEER_BUILD = False;
+        run();

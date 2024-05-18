@@ -9,7 +9,7 @@ import sys
 import os
 
 # Versioning
-VERSION_STR = "2.1.0";
+VERSION_STR = "2.2.0";
 VERSION_DATE = "18 May 2024";
 
 # Download retry unused for now because md5sum are not included with upstream-sources.yml yet.

@@ -5,20 +5,26 @@ from ...vendor.SplashPyUtils import logger, text
 from ...file import download, repack, push
 
 import threading
+import shutil
 import dload
 import sys
 import os
+
 
 def run():
 
     SourceStream.PACKAGE_REBUILDING = True;
 
-    print(SourceStream.PACKAGE_REBUILDING)
-
     # Create input/output directory
     logger.log.info("Created input/output directory's.");
     os.makedirs(SourceStream.DIR_INPUT, exist_ok=True)
     os.makedirs(SourceStream.DIR_OUTPUT, exist_ok=True)
+
+    logger.log.info("Cleaning input directory when necessary.");
+    for item in os.listdir(SourceStream.DIR_INPUT):
+            item_path = os.path.join(SourceStream.DIR_INPUT, item)
+            if os.path.isdir(item_path):
+                shutil.rmtree(item_path)
 
 
     # Cloning buildscipt repo
@@ -45,10 +51,20 @@ def run():
         download.download_tool(tool)
 
     logger.log.info("Starting to repack packages, this can take a while...");
-    for tool in tools:
-        threading.Thread(target=repack.repack_tool, args=(tool, )).start()
-        #repack.repack_tool(tool)
+    threads = [];
 
+    # make threads for every tool
+    for tool in tools:
+        threads.append(threading.Thread(target=repack.repack_tool, args=(tool, ))) 
+
+    # start all threads
+    for thread in threads:
+        thread.start();
+
+    # wait for every thread to be finished
+    for thread in threads:
+        thread.join()
+        
     logger.log.info("Starting to push packages to final destination...");
     push.push(tools)
 

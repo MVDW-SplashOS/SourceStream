@@ -21,8 +21,8 @@ def run():
 
         if command[0] in ["help", "man", "manual"]:
             help.print_help()
-        elif command[0] in ["serv"]:
-            SourceStream.AS_SERVICE = True;
+        #elif command[0] in ["serv"]:
+        #    SourceStream.AS_SERVICE = True;
 
         elif command[0] in ["package", "p", "list"]:
             package.run(command, arg);

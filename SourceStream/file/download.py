@@ -9,6 +9,7 @@ def download_tool(package):
     package_name = package["package"];
     package_version = package["version"];
     package_url = SourceStream.YAML_SOURCES[package_name]["url"].replace("{VERSION}", package_version);
+    package_url = package_url.replace("{VERSION_SEPARATE_UNDERSCORE}", package_version.replace(".", "_"));
     package_filename = os.path.basename(package_url);
     package_path = os.path.join(SourceStream.DIR_INPUT, package_filename)
 

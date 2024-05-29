@@ -13,7 +13,7 @@ def run(command, arg):
         packageQueue.add(arg)
 
     elif command_full in ["package-list", "list"]:
-        packageList.show()
+        packageList.show(arg)
         
     else:
         logger.log.fail("Invalid package argument, please check the manual: --help")

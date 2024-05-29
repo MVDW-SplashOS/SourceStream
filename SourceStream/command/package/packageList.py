@@ -2,7 +2,7 @@ from ... import SourceStream;
 
 from ...vendor.SplashPyUtils import logger
 
-def show():
+def show(args):
 
     package_tree = []
     for package in SourceStream.YAML_EDITION["packages"]:

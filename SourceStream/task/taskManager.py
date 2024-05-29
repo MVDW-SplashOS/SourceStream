@@ -1,7 +1,7 @@
 from .. import SourceStream;
 
 #tasks
-from .tasks import modifyEdition, repackPackages, service
+from .tasks import upstreamUpgrade, repackPackages, service
 
 def run():
     TASKS_ENABLED = SourceStream.TASK_TYPES_ENABLED;
@@ -12,5 +12,5 @@ def run():
     elif(TASKS_ENABLED["REPACK_PACKAGES"]):
         repackPackages.run()
 
-    elif(TASKS_ENABLED["MODIFY_EDITION"]):
-        modifyEdition.run()
+    elif(TASKS_ENABLED["UPSTREAM_UPGRADE"]):
+        upstreamUpgrade.run()

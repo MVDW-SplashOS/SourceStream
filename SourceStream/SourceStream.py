@@ -33,7 +33,7 @@ YAML_SOURCES = {}
 # Tasks types enabled
 TASK_TYPES_ENABLED = {
     "REPACK_PACKAGES": False,
-    "MODIFY_EDITION": False
+    "UPSTREAM_UPGRADE": False
 }
 
 # Package information
@@ -41,6 +41,10 @@ PACKAGES = [];
 PACKAGES_ALL = False;
 PACKAGE_REBUILD_AFTEER_BUILD = False;
 PACKAGE_REBUILDING = False;
+
+# Edition information
+EDITION_LIST = ["molecule"] # Todo: make it a configuration fike
+EDITION_SELECTED = None;
 
 # Running as service
 AS_SERVICE = False;

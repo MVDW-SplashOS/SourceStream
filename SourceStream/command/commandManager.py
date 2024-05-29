@@ -30,7 +30,6 @@ def run():
 
         elif command[0] in ["upstream"]:
             upstream.run(command, arg);
-            SourceStream.TASK_TYPES_ENABLED["MODIFY_EDITION"] = True;
     
         else:
             logger.log.fail("Invalid argument, please check the manual: --help")

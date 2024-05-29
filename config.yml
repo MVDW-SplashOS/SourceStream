@@ -10,6 +10,7 @@ version: "0.0.1-dev"
 # NOTE: This option will be ignored if the file .lock-sources exist in the root folder.
 #       Updating the sources file will be disabled.
 update-sources: true
+update-edition: false
 
 push:
   # Where should the final destination for the package be:

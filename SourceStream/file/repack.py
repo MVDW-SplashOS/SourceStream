@@ -38,14 +38,14 @@ def repack_tool(packages):
             tar.add(os.path.join(SourceStream.DIR_INPUT, package_fullname), arcname=package_fullname)
 
             # Check if configuration files exist for these packages
-            if os.path.exists(os.path.join(SourceStream.DIR_BUILTSCRIPTS, package_name)):
-                tar.add(os.path.join(SourceStream.DIR_BUILTSCRIPTS, package_name, "manifest.yml"), arcname="manifest.yml")
+            if os.path.exists(os.path.join(SourceStream.DIR_BUILTSCRIPTS, package_name, package_version)):
+                tar.add(os.path.join(SourceStream.DIR_BUILTSCRIPTS, package_name, package_version, "manifest.yml"), arcname="manifest.yml")
 
                 # Check if there are some extra folders included 
-                if os.path.exists(os.path.join(SourceStream.DIR_BUILTSCRIPTS, package_name, "build")):
-                    tar.add(os.path.join(SourceStream.DIR_BUILTSCRIPTS, package_name, "build"), arcname="build")
-                if os.path.exists(os.path.join(SourceStream.DIR_BUILTSCRIPTS, package_name, "patch")):
-                    tar.add(os.path.join(SourceStream.DIR_BUILTSCRIPTS, package_name, "patch"), arcname="patch")
+                if os.path.exists(os.path.join(SourceStream.DIR_BUILTSCRIPTS, package_name, package_version, "build")):
+                    tar.add(os.path.join(SourceStream.DIR_BUILTSCRIPTS, package_name, package_version, "build"), arcname="build")
+                if os.path.exists(os.path.join(SourceStream.DIR_BUILTSCRIPTS, package_name, package_version, "patch")):
+                    tar.add(os.path.join(SourceStream.DIR_BUILTSCRIPTS, package_name, package_version, "patch"), arcname="patch")
             
             else:
                 logger.log.warn("The package " + package_name + " does not have a manifest.")

@@ -7,7 +7,13 @@ import os
 def load():
     YAML_CONFIG = config.configloader("config").load()
 
-    if not os.path.isfile("input/mappings.json"):
+    # Create input/output directory
+    logger.log.info("Created input/output directory's.");
+    os.makedirs(SourceStream.DIR_INPUT, exist_ok=True)
+    os.makedirs(SourceStream.DIR_OUTPUT, exist_ok=True)
+
+
+    if not os.path.isfile("input/LFS-mapping.json"):
         r = requests.get("https://www.enthix.net/SplashOS/downloads/configs/LFS-mapping.json")
         open("input/LFS-mapping.json", 'wb').write(r.content)
 

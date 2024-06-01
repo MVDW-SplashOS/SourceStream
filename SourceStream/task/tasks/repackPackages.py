@@ -55,18 +55,19 @@ def run():
 
     # make threads for every tool
     for tool in tools:
-        threads.append(threading.Thread(target=repack.repack_tool, args=(tool, ))) 
+    #     threads.append(threading.Thread(target=repack.repack_tool, args=(tool, ))) 
+        repack.repack_tool(tool);
 
-    # start all threads
-    for thread in threads:
-        thread.start();
+    # # start all threads
+    # for thread in threads:
+    #     thread.start();
 
-    # wait for every thread to be finished
-    for thread in threads:
-        thread.join()
+    # # wait for every thread to be finished
+    # for thread in threads:
+    #     thread.join()
         
-    logger.log.info("Starting to push packages to final destination...");
-    push.push(tools)
+    # logger.log.info("Starting to push packages to final destination...");
+    # push.push(tools)
 
     SourceStream.PACKAGE_REBUILDING = False
     if(SourceStream.AS_SERVICE and SourceStream.PACKAGE_REBUILD_AFTEER_BUILD):

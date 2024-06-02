@@ -1,4 +1,5 @@
-from ..vendor.SplashPyUtils import config
+from .. import SourceStream;
+from ..vendor.SplashPyUtils import config, logger
 
 import requests
 import os

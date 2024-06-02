@@ -4,6 +4,8 @@ from ...vendor.SplashPyUtils import logger, text
 
 from ...file import download, repack, push
 
+from multiprocessing import Process, Queue, Lock, current_process
+import multiprocessing
 import threading
 import shutil
 import dload
@@ -51,23 +53,14 @@ def run():
         download.download_tool(tool)
 
     logger.log.info("Starting to repack packages, this can take a while...");
-    threads = [];
-
-    # make threads for every tool
-    for tool in tools:
-    #     threads.append(threading.Thread(target=repack.repack_tool, args=(tool, ))) 
-        repack.repack_tool(tool);
-
-    # # start all threads
-    # for thread in threads:
-    #     thread.start();
-
-    # # wait for every thread to be finished
-    # for thread in threads:
-    #     thread.join()
         
-    # logger.log.info("Starting to push packages to final destination...");
-    # push.push(tools)
+    # Repack packages with multiprocessing
+    cores = multiprocessing.cpu_count()
+    with multiprocessing.Pool(processes=cores) as pool:
+        pool.map(repack.repack_tool, tools)
+        
+    logger.log.info("Starting to push packages to final destination...");
+    push.push(tools)
 
     SourceStream.PACKAGE_REBUILDING = False
     if(SourceStream.AS_SERVICE and SourceStream.PACKAGE_REBUILD_AFTEER_BUILD):

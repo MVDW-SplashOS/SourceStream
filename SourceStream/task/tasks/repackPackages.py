@@ -4,9 +4,8 @@ from ...vendor.SplashPyUtils import logger, text
 
 from ...file import download, repack, push
 
-from multiprocessing import Process, Queue, Lock, current_process
+
 import multiprocessing
-import threading
 import shutil
 import dload
 import sys

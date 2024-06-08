@@ -38,13 +38,13 @@ def get_package_mapping(file):
 
 
 def check_mapping(packages, mapping):
-    sucsess = True
+    success = True
     for package in packages:
         if not mapping.get(package[0]):
-            logger.log.fail("Package " + package[0] + " has no mapping.")
-            sucsess = False
+            logger.log.fail(f"Package {package[0]} has no mapping.")
+            success = False
 
-    return sucsess
+    return success
 
 
 
@@ -52,7 +52,7 @@ def run():
     logger.log.info("Getting package and edition data...")
 
     packages = get_package_info()
-    packages_mapped = [];
+    packages_mapped = []
     mapping = get_package_mapping("input/LFS-mapping.json")
 
 
@@ -65,7 +65,7 @@ def run():
 
     # After validating remapping every package
     for package in packages:
-        packages_mapped.append([mapping.get(package[0]), package[1]]);
+        packages_mapped.append([mapping.get(package[0]), package[1]])
     
     with open("./edition-configuration.yml", "r") as edition_raw:
         yaml = ruamel.yaml.YAML()
@@ -80,7 +80,7 @@ def run():
             if package_map[0] == edition["packages"][i]["package"]:
                 new_version = package_map[1]
 
-        edition["packages"][i]["version"] = new_version;
+        edition["packages"][i]["version"] = new_version
 
     logger.log.info("Upading done, writing...")
 

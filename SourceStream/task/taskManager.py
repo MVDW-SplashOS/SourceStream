@@ -1,10 +1,10 @@
-from .. import SourceStream;
+from .. import SourceStream
 
 #tasks
 from .tasks import upstreamUpgrade, repackPackages, service
 
 def run():
-    TASKS_ENABLED = SourceStream.TASK_TYPES_ENABLED;
+    TASKS_ENABLED = SourceStream.TASK_TYPES_ENABLED
     if(SourceStream.AS_SERVICE):
         service.run()
         

@@ -1,4 +1,4 @@
-from .. import SourceStream;
+from .. import SourceStream
 
 from ..vendor.SplashPyUtils import logger
 
@@ -22,14 +22,14 @@ def run():
         if command[0] in ["help", "man", "manual"]:
             help.print_help()
         #elif command[0] in ["serv"]:
-        #    SourceStream.AS_SERVICE = True;
+        #    SourceStream.AS_SERVICE = True
 
         elif command[0] in ["package", "p", "list"]:
-            package.run(command, arg);
-            SourceStream.TASK_TYPES_ENABLED["REPACK_PACKAGES"] = True;
+            package.run(command, arg)
+            SourceStream.TASK_TYPES_ENABLED["REPACK_PACKAGES"] = True
 
         elif command[0] in ["upstream"]:
-            upstream.run(command, arg);
+            upstream.run(command, arg)
     
         else:
             logger.log.fail("Invalid argument, please check the manual: --help")

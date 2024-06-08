@@ -4,6 +4,6 @@ from SourceStream.vendor.SplashPyUtils import logger
 
 if __name__=="__main__":
     try:
-        SourceStream.main();
+        SourceStream.main()
     except KeyboardInterrupt:
         logger.log.info("Interrupt signal received.")

@@ -64,13 +64,13 @@ def main():
 
 
     # Print basic tool information
-    text_title = text.format("\x1b[136mSourceStream\x1b[10m")
+    text_title = text.format("\x1b[1;36mSourceStream\x1b[1;0m")
     text_title.center()
 
-    text_desc = text.format("\x1b[036mA tool to download, patch and repack core packages for SplashOS\x1b[10m")
+    text_desc = text.format("\x1b[0;36mA tool to download, patch and repack core packages for SplashOS\x1b[1;0m")
     text_desc.center()
     
-    text_ver = text.format(f"\x1b[036mVersion: {VERSION_STR} ( {VERSION_DATE} )\x1b[00m")
+    text_ver = text.format("\x1b[0;36mVersion: {VERSION_STR} ({VERSION_DATE})\x1b[0;0m")
     text_ver.center()
 
     logger.log.info(separator)

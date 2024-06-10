@@ -53,6 +53,6 @@ def repack_tool(packages):
         # Cleanup the input folder
         shutil.rmtree(package_path_folder)
 
-        logger.log.ok(f"Repacked package \x1b[137m{package_name}({package_version})\x1b[0m Successfully.")
+        logger.log.ok(f"Repacked package \x1b[1;37m{package_name}({package_version})\x1b[0m Successfully.")
     except Exception as e:
-        logger.log.fail(f"Error trying to repack package \x1b[137m{package_name}({package_version})\x1b[0m, Configuration error?\n{e}")
+        logger.log.fail(f"Error trying to repack package \x1b[1;37m{package_name}({package_version})\x1b[0m, Configuration error?\n{e}")

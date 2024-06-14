@@ -70,7 +70,7 @@ def main():
     text_desc = text.format("\x1b[0;36mA tool to download, patch and repack core packages for SplashOS\x1b[1;0m")
     text_desc.center()
     
-    text_ver = text.format("\x1b[0;36mVersion: {VERSION_STR} ({VERSION_DATE})\x1b[0;0m")
+    text_ver = text.format(f"\x1b[0;36mVersion: {VERSION_STR} ({VERSION_DATE})\x1b[0;0m")
     text_ver.center()
 
     logger.log.info(separator)

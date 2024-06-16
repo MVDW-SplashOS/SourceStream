@@ -1,4 +1,4 @@
-from ... import SourceStream;
+from ... import SourceStream
 
 from ...vendor.SplashPyUtils import logger
 
@@ -10,23 +10,23 @@ def run(command, arg):
     command_full = delimiter.join(command)
 
     if command_full in ["upstream-add"]:
-        SourceStream.TASK_TYPES_ENABLED["UPSTREAM_ADD"] = True;
+        SourceStream.TASK_TYPES_ENABLED["UPSTREAM_ADD"] = True
         upstreamAdd.run(arg)
 
     elif command_full in ["upstream-modify"]:
-        SourceStream.TASK_TYPES_ENABLED["UPSTREAM_MODIFY"] = True;
+        SourceStream.TASK_TYPES_ENABLED["UPSTREAM_MODIFY"] = True
         upstreamModify.run(arg)
 
     elif command_full in ["upstream-checksum"]:
-        SourceStream.TASK_TYPES_ENABLED["UPSTREAM_CHECKSUM"] = True;
+        SourceStream.TASK_TYPES_ENABLED["UPSTREAM_CHECKSUM"] = True
         upstreamChecksum.run(arg)
 
     elif command_full in ["upstream-remove"]:
-        SourceStream.TASK_TYPES_ENABLED["UPSTREAM_REMOVE"] = True;
+        SourceStream.TASK_TYPES_ENABLED["UPSTREAM_REMOVE"] = True
         upstreamRemove.run(arg)
 
     elif command_full in ["upstream-upgrade"]:
-        SourceStream.TASK_TYPES_ENABLED["UPSTREAM_UPGRADE"] = True;
+        SourceStream.TASK_TYPES_ENABLED["UPSTREAM_UPGRADE"] = True
         upstreamUpgrade.run(arg)
         
     else:

@@ -1,4 +1,4 @@
-from ... import SourceStream;
+from ... import SourceStream
 
 from ...vendor.SplashPyUtils import logger
 

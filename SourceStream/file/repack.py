@@ -3,8 +3,9 @@ from .. import SourceStream
 from ..vendor.SplashPyUtils import logger
 
 import shutil
-import tarfile
+# import tarfile
 import os
+import subprocess
 
 def repack_tool(packages):
     package_name = packages["package"]
@@ -17,12 +18,7 @@ def repack_tool(packages):
 
     try:
         # Extract tar file in the input directory.
-        with tarfile.open(package_path_input) as f:
-            if not SourceStream.YAML_SOURCES[package_name]["subdir"]:
-                os.makedirs(package_path_folder, exist_ok=True)
-                f.extractall(package_path_folder)
-            else:
-                f.extractall(SourceStream.DIR_INPUT)
+        subprocess.run(["tar", "-xf", package_path_input, "-C", SourceStream.DIR_INPUT], check=True)
 
         # Check if the folder just extracted needs to be renamed.
         if isinstance(SourceStream.YAML_SOURCES[package_name]["subdir"], str):
@@ -33,22 +29,24 @@ def repack_tool(packages):
         # Create package directory where repacked tar file will be saved in.
         os.makedirs(os.path.join(SourceStream.DIR_OUTPUT, package_name), exist_ok=True)
 
+       # Create a list of files and directories to be included in the tar file
+        tar_items = [package_fullname]
+
+        # Check if configuration files exist for these packages
+        if os.path.exists(os.path.join(SourceStream.DIR_BUILTSCRIPTS, package_name, package_version)):
+            tar_items.append(os.path.join(SourceStream.DIR_BUILTSCRIPTS, package_name, package_version, "manifest.yml"))
+
+            # Check if there are some extra folders included 
+            if os.path.exists(os.path.join(SourceStream.DIR_BUILTSCRIPTS, package_name, package_version, "build")):
+                tar_items.append(os.path.join(SourceStream.DIR_BUILTSCRIPTS, package_name, package_version, "build"))
+            if os.path.exists(os.path.join(SourceStream.DIR_BUILTSCRIPTS, package_name, package_version, "patch")):
+                tar_items.append(os.path.join(SourceStream.DIR_BUILTSCRIPTS, package_name, package_version, "patch"))
+        else:
+            logger.log.warn(f"The package {package_name} does not have a manifest.")
+
         # Create tar file
-        with tarfile.open(os.path.join(SourceStream.DIR_OUTPUT, package_name, f"{package_fullname}.tar.xz"), "w:xz") as tar:
-            tar.add(os.path.join(SourceStream.DIR_INPUT, package_fullname), arcname=package_fullname)
-
-            # Check if configuration files exist for these packages
-            if os.path.exists(os.path.join(SourceStream.DIR_BUILTSCRIPTS, package_name, package_version)):
-                tar.add(os.path.join(SourceStream.DIR_BUILTSCRIPTS, package_name, package_version, "manifest.yml"), arcname="manifest.yml")
-
-                # Check if there are some extra folders included 
-                if os.path.exists(os.path.join(SourceStream.DIR_BUILTSCRIPTS, package_name, package_version, "build")):
-                    tar.add(os.path.join(SourceStream.DIR_BUILTSCRIPTS, package_name, package_version, "build"), arcname="build")
-                if os.path.exists(os.path.join(SourceStream.DIR_BUILTSCRIPTS, package_name, package_version, "patch")):
-                    tar.add(os.path.join(SourceStream.DIR_BUILTSCRIPTS, package_name, package_version, "patch"), arcname="patch")
-            
-            else:
-                logger.log.warn(f"The package {package_name} does not have a manifest.")
+        tar_output_path = os.path.join(SourceStream.DIR_OUTPUT, package_name, f"{package_fullname}.tar.xz")
+        subprocess.run(["tar", "-cJf", tar_output_path, "-C", SourceStream.DIR_INPUT] + tar_items, check=True)
 
         # Cleanup the input folder
         shutil.rmtree(package_path_folder)

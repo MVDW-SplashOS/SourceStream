@@ -6,6 +6,7 @@ from ...file import download, repack, push
 
 
 import multiprocessing
+import asyncio
 import shutil
 import dload
 import sys
@@ -48,9 +49,9 @@ def run():
         tools = SourceStream.PACKAGES
 
     logger.log.info("Starting to download and check packages, this can take a while...")
-    for tool in tools:
-        download.download_tool(tool)
 
+    asyncio.run(download.download_tool(tools))
+    
     logger.log.info("Starting to repack packages, this can take a while...")
         
     # Repack packages with multiprocessing

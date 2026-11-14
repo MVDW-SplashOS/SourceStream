@@ -49,6 +49,24 @@ def _verify_extracted(archive_path, folder):
         )
 
 
+def _write_repacked_tar(tar, package_name, package_version, package_fullname):
+    """Add the package source (plus BuildScripts extras) to an open tarfile."""
+    tar.add(os.path.join(SourceStream.DIR_INPUT, package_fullname), arcname=package_fullname)
+
+    # Check if configuration files exist for these packages
+    if os.path.exists(os.path.join(SourceStream.DIR_BUILTSCRIPTS, package_name, package_version)):
+        tar.add(os.path.join(SourceStream.DIR_BUILTSCRIPTS, package_name, package_version, "manifest.yml"), arcname="manifest.yml")
+
+        # Check if there are some extra folders included
+        if os.path.exists(os.path.join(SourceStream.DIR_BUILTSCRIPTS, package_name, package_version, "build")):
+            tar.add(os.path.join(SourceStream.DIR_BUILTSCRIPTS, package_name, package_version, "build"), arcname="build")
+        if os.path.exists(os.path.join(SourceStream.DIR_BUILTSCRIPTS, package_name, package_version, "patch")):
+            tar.add(os.path.join(SourceStream.DIR_BUILTSCRIPTS, package_name, package_version, "patch"), arcname="patch")
+
+    else:
+        logger.log.warn(f"The package {package_name} does not have a manifest.")
+
+
 def repack_tool(packages):
     package_name = packages["package"]
     package_version = packages["version"]

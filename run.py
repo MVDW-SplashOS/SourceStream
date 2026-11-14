@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 from SourceStream import SourceStream
 
 from SourceStream.vendor.SplashPyUtils import logger

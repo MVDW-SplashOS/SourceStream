@@ -8,22 +8,45 @@ import tarfile
 import os
 
 
-def _write_repacked_tar(tar, package_name, package_version, package_fullname):
-    """Add the package source (plus BuildScripts extras) to an open tarfile."""
-    tar.add(os.path.join(SourceStream.DIR_INPUT, package_fullname), arcname=package_fullname)
+def _clean(path):
+    shutil.rmtree(path, ignore_errors=True)
 
-    # Check if configuration files exist for these packages
-    if os.path.exists(os.path.join(SourceStream.DIR_BUILTSCRIPTS, package_name, package_version)):
-        tar.add(os.path.join(SourceStream.DIR_BUILTSCRIPTS, package_name, package_version, "manifest.yml"), arcname="manifest.yml")
 
-        # Check if there are some extra folders included
-        if os.path.exists(os.path.join(SourceStream.DIR_BUILTSCRIPTS, package_name, package_version, "build")):
-            tar.add(os.path.join(SourceStream.DIR_BUILTSCRIPTS, package_name, package_version, "build"), arcname="build")
-        if os.path.exists(os.path.join(SourceStream.DIR_BUILTSCRIPTS, package_name, package_version, "patch")):
-            tar.add(os.path.join(SourceStream.DIR_BUILTSCRIPTS, package_name, package_version, "patch"), arcname="patch")
+def _verify_extracted(archive_path, folder):
+    """Fail loudly when the extracted tree does not match the archive.
 
+    A partial extraction (interrupted run, concurrent instance, stale
+    leftovers) used to be repacked and pushed silently, producing corrupt
+    packages that only fail later at build time (tcl/tcl_docs did exactly
+    that on 14 Nov 2026). Paths are compared relative to the archive's
+    top-level directory, since the tree may be renamed afterwards.
+    """
+    with tarfile.open(archive_path) as f:
+        names = [m.name for m in f.getmembers() if not m.isdir()]
+    names = [n[2:] if n.startswith("./") else n for n in names]
+    tops = {n.split("/", 1)[0] for n in names if "/" in n}
+    if len(tops) == 1:
+        top = tops.pop()
+        expected = {n[len(top) + 1:] for n in names if n.startswith(top + "/")}
     else:
-        logger.log.warn(f"The package {package_name} does not have a manifest.")
+        expected = set(names)
+
+    got = set()
+    for root, dirs, files in os.walk(folder):
+        rel = os.path.relpath(root, folder)
+        prefix = "" if rel == "." else rel.replace(os.sep, "/") + "/"
+        for d in dirs:
+            if os.path.islink(os.path.join(root, d)):
+                got.add(prefix + d)
+        got.update(prefix + name for name in files)
+
+    missing = expected - got
+    if missing:
+        raise RuntimeError(
+            f"extraction incomplete: {len(missing)} of {len(expected)} files "
+            f"missing (e.g. {sorted(missing)[:3]}). The archive may be "
+            f"truncated or another process touched the extraction directory."
+        )
 
 
 def repack_tool(packages):
@@ -35,20 +58,40 @@ def repack_tool(packages):
     package_path_input = os.path.join(SourceStream.DIR_INPUT, package_filename)
     package_path_folder = os.path.join(SourceStream.DIR_INPUT, package_fullname)
 
+    # Each package extracts into its own isolated staging directory. Two
+    # packages whose upstream archives use the same inner directory name
+    # (tcl and tcl_docs both use tcl<VERSION>/) must never share an
+    # extraction directory — one would rename it away while the other is
+    # still reading it, and both tarballs end up corrupt.
+    staging = os.path.join(SourceStream.DIR_INPUT, f".staging-{package_fullname}")
+    _clean(staging)
+    os.makedirs(staging)
+
     try:
-        # Extract tar file in the input directory.
+        # Extract tar file into the isolated staging directory.
         with tarfile.open(package_path_input) as f:
-            if not SourceStream.YAML_SOURCES[package_name]["subdir"]:
-                os.makedirs(package_path_folder, exist_ok=True)
-                f.extractall(package_path_folder)
-            else:
-                f.extractall(SourceStream.DIR_INPUT)
+            f.extractall(staging)
 
         # Check if the folder just extracted needs to be renamed.
         if isinstance(SourceStream.YAML_SOURCES[package_name]["subdir"], str):
             subdir = SourceStream.YAML_SOURCES[package_name]["subdir"].replace("{VERSION}", package_version).replace("{PACKAGE}", package_name)
-            path_source = os.path.join(SourceStream.DIR_INPUT, subdir)
-            os.rename(path_source, package_path_folder)
+            path_source = os.path.join(staging, subdir)
+        elif SourceStream.YAML_SOURCES[package_name]["subdir"] is False:
+            # Multiple top-level entries (e.g. tzdata): the whole staging
+            # dir becomes the package dir.
+            path_source = staging
+        else:
+            # subdir: true -> the archive's own top-level dir, whatever it is
+            tops = [n for n in os.listdir(staging) if os.path.isdir(os.path.join(staging, n))]
+            if len(tops) != 1:
+                raise RuntimeError(f"expected exactly one top-level dir in the archive, got: {tops}")
+            path_source = os.path.join(staging, tops[0])
+
+        _clean(package_path_folder)
+        os.rename(path_source, package_path_folder)
+
+        # Never pack a partially extracted tree.
+        _verify_extracted(package_path_input, package_path_folder)
 
         # Create package directory where repacked tar file will be saved in.
         os.makedirs(os.path.join(SourceStream.DIR_OUTPUT, package_name), exist_ok=True)
@@ -81,3 +124,5 @@ def repack_tool(packages):
         logger.log.ok(f"Repacked package \x1b[1;37m{package_name}({package_version})\x1b[0m Successfully.")
     except Exception as e:
         logger.log.fail(f"Error trying to repack package \x1b[1;37m{package_name}({package_version})\x1b[0m, Configuration error?\n{e}")
+    finally:
+        _clean(staging)

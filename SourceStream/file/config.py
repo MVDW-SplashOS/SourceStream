@@ -15,17 +15,17 @@ def load():
 
 
     if not os.path.isfile("input/LFS-mapping.json"):
-        r = requests.get("https://www.enthix.net/SplashOS/downloads/configs/LFS-mapping.json")
+        r = requests.get("https://syspkg.splashos.com/configs/LFS-mapping.json")
         open("input/LFS-mapping.json", 'wb').write(r.content)
 
 
     if YAML_CONFIG["update-sources"] and not os.path.isfile(".lock-sources"):
-        r = requests.get("https://www.enthix.net/SplashOS/downloads/configs/upstream-sources.yml")
+        r = requests.get("https://syspkg.splashos.com/configs/upstream-sources.yml")
         open("upstream-sources.yml", 'wb').write(r.content)
     YAML_SOURCES = config.configloader("sources").load()
 
     if YAML_CONFIG["edition"] != "custom" or YAML_CONFIG["update-edition"]:
-        r = requests.get(f"https://www.enthix.net/SplashOS/downloads/configs/edition-packages/{YAML_CONFIG["version"]}/{YAML_CONFIG["edition"]}.yml")
+        r = requests.get(f"https://syspkg.splashos.com/configs/edition-packages/{YAML_CONFIG["version"]}/{YAML_CONFIG["edition"]}.yml")
         open("edition-configuration.yml", 'wb').write(r.content)
     YAML_EDITION = config.configloader("edition").load()
 

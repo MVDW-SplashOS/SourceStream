@@ -6,6 +6,20 @@ Clone the repo and go to the repo files:
 ```
 git clone --recursive https://github.com/MVDW-SplashOS/SourceStream.git && cd SourceStream
 ```
+
+go into venv
+```
+python3 -m venv venv
+source venv/bin/activate
+```
+
+
+Install packages:
+```
+pip3 install -r requirements.txt
+```
+
+
 Run the tool:
 ```
 python3 run.py

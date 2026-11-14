@@ -4,13 +4,12 @@ from .command import commandManager
 from .task import taskManager
 from .file import config
 
-import dload
 import sys
 import os
 
 # Versioning
-VERSION_STR = "2.2.0"
-VERSION_DATE = "18 May 2024"
+VERSION_STR = "2.3.0"
+VERSION_DATE = "14 Nov 2026"
 
 # Download retry unused for now because md5sum are not included with upstream-sources.yml yet.
 DOWNLOAD_RETRYS = 0
@@ -23,7 +22,7 @@ separator = "-------------------------------------------------------------------
 DIR_CURRENT = os.path.dirname(os.path.abspath(sys.argv[0]))
 DIR_INPUT = f"{DIR_CURRENT}/input/"
 DIR_OUTPUT = f"{DIR_CURRENT}/output/"
-DIR_BUILTSCRIPTS = f"{DIR_INPUT}BuildScripts-main/"
+DIR_BUILTSCRIPTS = f"{DIR_INPUT}BuildScripts/"
 
 # All yaml files
 YAML_CONFIG = {}
@@ -69,7 +68,7 @@ def main():
 
     text_desc = text.format("\x1b[0;36mA tool to download, patch and repack core packages for SplashOS\x1b[1;0m")
     text_desc.center()
-    
+
     text_ver = text.format(f"\x1b[0;36mVersion: {VERSION_STR} ({VERSION_DATE})\x1b[0;0m")
     text_ver.center()
 

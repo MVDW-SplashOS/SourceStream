@@ -7,7 +7,7 @@ from ...file import download, repack, push
 
 import multiprocessing
 import shutil
-import dload
+import subprocess
 import sys
 import os
 
@@ -31,7 +31,10 @@ def run():
     # Cloning buildscipt repo
     logger.log.info("Cloning buildscript repository.")
     if not os.path.exists(SourceStream.DIR_BUILTSCRIPTS):
-        dload.git_clone("https://github.com/MVDW-SplashOS/BuildScripts.git", SourceStream.DIR_INPUT)
+        subprocess.run(
+            ["git", "clone", "--depth", "1", "https://github.com/MVDW-SplashOS/BuildScripts.git", SourceStream.DIR_BUILTSCRIPTS],
+            check=True,
+        )
 
 
     if len(SourceStream.PACKAGES) == 0 and SourceStream.PACKAGES_ALL == False:

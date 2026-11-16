@@ -19,7 +19,12 @@ def push_sftp(packages):
     sftp_host = SourceStream.YAML_CONFIG["push"]["sftp"]["host"]
     sftp_port = SourceStream.YAML_CONFIG["push"]["sftp"]["port"]
     sftp_username = SourceStream.YAML_CONFIG["push"]["sftp"]["username"]
-    sftp_password = SourceStream.YAML_CONFIG["push"]["sftp"]["password"]
+    sftp_password = SourceStream.YAML_CONFIG["push"]["sftp"].get("password", "")
+    # Optional SSH private key auth: when "keyfile" is set in the push config,
+    # authenticate with that key instead of a password. "passphrase" is only
+    # needed for encrypted keys.
+    sftp_keyfile = SourceStream.YAML_CONFIG["push"]["sftp"].get("keyfile", "")
+    sftp_passphrase = SourceStream.YAML_CONFIG["push"]["sftp"].get("passphrase", "")
     sftp_path = SourceStream.YAML_CONFIG["push"]["sftp"]["path"]
 
     for package in packages:
@@ -33,8 +38,11 @@ def push_sftp(packages):
 
 
                 ssh.load_system_host_keys()
-                ssh.connect(sftp_host, username=sftp_username, password=sftp_password, port=sftp_port, look_for_keys=False, allow_agent=False)
-            
+                if sftp_keyfile:
+                    ssh.connect(sftp_host, username=sftp_username, key_filename=sftp_keyfile, passphrase=sftp_passphrase or None, port=sftp_port, look_for_keys=False, allow_agent=False)
+                else:
+                    ssh.connect(sftp_host, username=sftp_username, password=sftp_password, port=sftp_port, look_for_keys=False, allow_agent=False)
+
                 sftp = ssh.open_sftp()
                 logger.log.info(f"Connected to '{sftp_host}:{sftp_port}'")
 

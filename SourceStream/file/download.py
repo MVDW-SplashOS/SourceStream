@@ -35,7 +35,17 @@ def _verify_archive(content, filename, package_name, package_version):
             if not d.eof:
                 raise RuntimeError("truncated xz stream")
         elif filename.endswith(".tar.bz2"):
-            _drain(bz2.BZ2File(fileobj=io.BytesIO(content)))
+            # bz2.BZ2File lost its fileobj parameter in Python 3.13; stream
+            # through BZ2Decompressor (same reasoning as the xz branch).
+            d = bz2.BZ2Decompressor()
+            src = io.BytesIO(content)
+            while True:
+                chunk = src.read(1 << 20)
+                if not chunk or d.eof:
+                    break
+                d.decompress(chunk)
+            if not d.eof:
+                raise RuntimeError("truncated bz2 stream")
         elif filename.endswith(".zip"):
             with zipfile.ZipFile(io.BytesIO(content)) as z:
                 bad = z.testzip()

@@ -21,7 +21,19 @@ def _verify_archive(content, filename, package_name, package_version):
         if filename.endswith((".tar.gz", ".tgz")):
             _drain(gzip.GzipFile(fileobj=io.BytesIO(content)))
         elif filename.endswith(".tar.xz"):
-            _drain(lzma.LZMAFile(fileobj=io.BytesIO(content)))
+            # lzma.LZMAFile has no fileobj parameter (unlike gzip/bz2), so
+            # stream through LZMADecompressor: a corrupt stream raises
+            # LZMAError, and a truncated transfer is caught by the eof check
+            # (a valid xz stream must reach its end marker).
+            d = lzma.LZMADecompressor()
+            src = io.BytesIO(content)
+            while True:
+                chunk = src.read(1 << 20)
+                if not chunk or d.eof:
+                    break
+                d.decompress(chunk)
+            if not d.eof:
+                raise RuntimeError("truncated xz stream")
         elif filename.endswith(".tar.bz2"):
             _drain(bz2.BZ2File(fileobj=io.BytesIO(content)))
         elif filename.endswith(".zip"):

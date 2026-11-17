@@ -11,7 +11,7 @@ def push(packages):
     elif SourceStream.YAML_CONFIG["push"]["type"] == "none":
         logger.log.info("No push type set, will not move package from output.")
     else:
-        logger.log.fail(f"Invalid push type '{SourceStream.YAML_CONFIG["push"]["type"]}' in configuration.")
+        logger.log.fail(f"Invalid push type '{SourceStream.YAML_CONFIG['push']['type']}' in configuration.")
         exit(1)
 
 def push_sftp(packages):

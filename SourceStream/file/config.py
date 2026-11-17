@@ -25,7 +25,7 @@ def load():
     YAML_SOURCES = config.configloader("sources").load()
 
     if YAML_CONFIG["edition"] != "custom" or YAML_CONFIG["update-edition"]:
-        r = requests.get(f"https://syspkg.splashos.com/configs/edition-packages/{YAML_CONFIG["version"]}/{YAML_CONFIG["edition"]}.yml")
+        r = requests.get(f"https://syspkg.splashos.com/configs/edition-packages/{YAML_CONFIG['version']}/{YAML_CONFIG['edition']}.yml")
         open("edition-configuration.yml", 'wb').write(r.content)
     YAML_EDITION = config.configloader("edition").load()
 

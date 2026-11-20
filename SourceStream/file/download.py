@@ -65,18 +65,31 @@ def _verify_archive(content, filename, package_name, package_version):
         )
 
 
+def expand_package_url(package_name, package_version):
+    """Upstream URL of a package with every version placeholder expanded.
+
+    Shared by download and repack: both must agree on the archive's file
+    name in input/, otherwise a package whose file name uses a placeholder
+    other than {VERSION} (icu4c-{VERSION_SEPARATE_UNDERSCORE}-src.tgz)
+    downloads fine but cannot be found again when repacking.
+    """
+    package_version_split = package_version.split(".")
+
+    url = SourceStream.YAML_SOURCES[package_name]["url"].replace("{VERSION}", package_version)
+    url = url.replace("{VERSION_SEPARATE_UNDERSCORE}", package_version.replace(".", "_"))
+
+    if(len(package_version_split) >= 1): url = url.replace("{VERSION_MAJOR}", package_version_split[0])
+    if(len(package_version_split) >= 2): url = url.replace("{VERSION_MINOR}", package_version_split[1])
+    if(len(package_version_split) >= 3): url = url.replace("{VERSION_REVISION}", package_version_split[2])
+    if(len(package_version_split) >= 4): url = url.replace("{VERSION_BUILD}", package_version_split[3])
+    return url
+
+
 def download_tool(package):
     package_name = package["package"]
     package_version = package["version"]
-    package_version_split = package["version"].split(".")
 
-    package_url = SourceStream.YAML_SOURCES[package_name]["url"].replace("{VERSION}", package_version)
-    package_url = package_url.replace("{VERSION_SEPARATE_UNDERSCORE}", package_version.replace(".", "_"))
-
-    if(len(package_version_split) >= 1): package_url = package_url.replace("{VERSION_MAJOR}", package_version_split[0])
-    if(len(package_version_split) >= 2): package_url = package_url.replace("{VERSION_MINOR}", package_version_split[1])
-    if(len(package_version_split) >= 3): package_url = package_url.replace("{VERSION_REVISION}", package_version_split[2])
-    if(len(package_version_split) >= 4): package_url = package_url.replace("{VERSION_BUILD}", package_version_split[3])
+    package_url = expand_package_url(package_name, package_version)
 
     package_filename = os.path.basename(package_url)
     package_path = os.path.join(SourceStream.DIR_INPUT, package_filename)

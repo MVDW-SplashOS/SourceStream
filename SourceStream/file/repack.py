@@ -2,6 +2,8 @@ from .. import SourceStream
 
 from ..vendor.SplashPyUtils import logger
 
+from . import download
+
 import shutil
 import subprocess
 import tarfile
@@ -70,7 +72,10 @@ def _write_repacked_tar(tar, package_name, package_version, package_fullname):
 def repack_tool(packages):
     package_name = packages["package"]
     package_version = packages["version"]
-    package_url = SourceStream.YAML_SOURCES[package_name]["url"].replace("{VERSION}", package_version)
+    # Same expansion as the download step, or archives whose file name uses
+    # another placeholder (icu4c-{VERSION_SEPARATE_UNDERSCORE}-src.tgz) are
+    # looked for under an unexpanded name and the repack fails.
+    package_url = download.expand_package_url(package_name, package_version)
     package_filename = os.path.basename(package_url)
     package_fullname = f"{package_name}-{package_version}"
     package_path_input = os.path.join(SourceStream.DIR_INPUT, package_filename)

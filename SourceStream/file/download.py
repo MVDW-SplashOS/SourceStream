@@ -82,7 +82,12 @@ def download_tool(package):
     package_path = os.path.join(SourceStream.DIR_INPUT, package_filename)
 
     if not os.path.exists(package_path):
-        r = requests.get(package_url)
+        # Ask for the archive unencoded: some hosts (e.g. Netlify for
+        # duktape.org) gzip-encode the transfer when the client advertises
+        # gzip, which requests does by default. requests then returns the
+        # decoded body, so its length never matches the (encoded)
+        # Content-Length and the truncation check below fires falsely.
+        r = requests.get(package_url, headers={"Accept-Encoding": "identity"})
 
         # Verify the download: some mirrors (e.g. SourceForge) truncate
         # transfers without an error, and a silently truncated archive gets

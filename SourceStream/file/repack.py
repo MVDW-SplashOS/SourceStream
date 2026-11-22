@@ -51,6 +51,50 @@ def _verify_extracted(archive_path, folder):
         )
 
 
+_CARGO_SOURCE_REPLACEMENT = """
+[source.crates-io]
+replace-with = "vendored-sources"
+
+[source.vendored-sources]
+directory = "vendor"
+"""
+
+
+def _cargo_vendor(folder, package_name):
+    """Vendor the Rust crates of a source tree for offline builds.
+
+    Some upstream release tarballs (librsvg) need crates.io at build time,
+    but packages are built in a chroot without network access. With
+    `cargo_vendor: true` in upstream-sources.yml the crates are fetched
+    here, into <source>/vendor, and .cargo/config.toml redirects crates-io
+    to them, so the build script can run cargo --offline. --locked keeps
+    the exact versions from the tarball's Cargo.lock. cargo vendor only
+    downloads and unpacks crates; it does not run build scripts.
+    """
+    cargo = shutil.which("cargo")
+    if not cargo:
+        raise RuntimeError(f"{package_name} needs cargo_vendor, but cargo is not installed")
+    if not os.path.exists(os.path.join(folder, "Cargo.lock")):
+        raise RuntimeError(f"{package_name}: cargo_vendor is set but the source has no Cargo.lock")
+
+    result = subprocess.run([cargo, "vendor", "--locked", "vendor"], cwd=folder,
+                            stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, text=True)
+    if result.returncode != 0:
+        raise RuntimeError(f"cargo vendor failed for {package_name}:\n{result.stderr.strip()}")
+
+    config_dir = os.path.join(folder, ".cargo")
+    os.makedirs(config_dir, exist_ok=True)
+    config_path = os.path.join(config_dir, "config.toml")
+    existing = ""
+    if os.path.exists(config_path):
+        with open(config_path) as f:
+            existing = f.read()
+    if "[source.crates-io]" not in existing:
+        with open(config_path, "a") as f:
+            f.write(_CARGO_SOURCE_REPLACEMENT)
+    logger.log.info(f"Vendored the Rust crates of \x1b[1;37m{package_name}\x1b[0m.")
+
+
 def _write_repacked_tar(tar, package_name, package_version, package_fullname):
     """Add the package source (plus BuildScripts extras) to an open tarfile."""
     tar.add(os.path.join(SourceStream.DIR_INPUT, package_fullname), arcname=package_fullname)
@@ -115,6 +159,10 @@ def repack_tool(packages):
 
         # Never pack a partially extracted tree.
         _verify_extracted(package_path_input, package_path_folder)
+
+        # Rust sources whose release tarball does not ship its crates.
+        if SourceStream.YAML_SOURCES[package_name].get("cargo_vendor"):
+            _cargo_vendor(package_path_folder, package_name)
 
         # Create package directory where repacked tar file will be saved in.
         os.makedirs(os.path.join(SourceStream.DIR_OUTPUT, package_name), exist_ok=True)
